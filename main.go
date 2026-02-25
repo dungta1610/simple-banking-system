@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gin-gonic/gin"
+	ginpkg "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"simple-banking-system/component/postgres"
+	accountgin "simple-banking-system/module/account/transport/gin"
 )
 
 func main() {
@@ -26,22 +27,34 @@ func main() {
 	}
 
 	ctx := context.Background()
-	pool, err := postgres.NewPool(ctx, postgres.Config{DSN: dsn})
+
+	pool, err := postgres.NewPool(ctx, postgres.Config{
+		DSN: dsn,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer pool.Close()
 
-	r := gin.Default()
+	r := ginpkg.Default()
 
-	r.GET("/health", func(c *gin.Context) {
+	r.GET("/health", func(c *ginpkg.Context) {
 		if err := pool.Ping(c.Request.Context()); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "down"})
+			c.JSON(http.StatusServiceUnavailable, ginpkg.H{
+				"status": "down",
+				"error":  err.Error(),
+			})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+
+		c.JSON(http.StatusOK, ginpkg.H{
+			"status": "ok",
+		})
 	})
 
+	accountgin.RegisterRoutes(r, pool)
+
+	log.Printf("server is running on :%s", port)
 	if err := r.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}
