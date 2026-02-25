@@ -35,7 +35,7 @@ func (s *sqlStore) CreateAccount(ctx context.Context, data *model.Account) (*mod
 	return &account, nil
 }
 
-func (s *sqlStore) GetAccount(ctx context.Context, data *model.Account) (*model.Account, error) {
+func (s *sqlStore) GetAccount(ctx context.Context, id int64) (*model.Account, error) {
 	query := `
 		SELECT id, owner_name, balance, created_at
 		FROM accounts
@@ -43,7 +43,7 @@ func (s *sqlStore) GetAccount(ctx context.Context, data *model.Account) (*model.
 		LIMIT 1
 	`
 	var account model.Account
-	err := s.db.QueryRow(ctx, query, data.OwnerName, data.Balance).Scan(
+	err := s.db.QueryRow(ctx, query, id).Scan(
 		&account.ID,
 		&account.OwnerName,
 		&account.Balance,
@@ -54,7 +54,6 @@ func (s *sqlStore) GetAccount(ctx context.Context, data *model.Account) (*model.
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, model.ErrAccountNotFound
 		}
-
 		return nil, fmt.Errorf("%w: get account: %v", model.ErrDBOperation, err)
 	}
 
