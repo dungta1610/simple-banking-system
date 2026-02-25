@@ -60,9 +60,9 @@ func (s *sqlStore) CreateTransferTx(ctx context.Context, tx pgx.Tx, fromAccountI
 
 func (s *sqlStore) CreateEntryTx(ctx context.Context, tx pgx.Tx, accountID int64, transferID int64, amount int64) (*model.Entry, error) {
 	query := `
-		INSERT INTO entries (from_account_id, to_account_id, amount)
+		INSERT INTO entries (account_id, transfer_id, amount)
 		VALUES ($1, $2, $3)
-		RETURNING id, from_account_id, to_account_id, amount, created_at
+		RETURNING id, account_id, transfer_id, amount, created_at
 	`
 	var e model.Entry
 	err := tx.QueryRow(ctx, query, accountID, transferID, amount).Scan(
