@@ -61,6 +61,8 @@ func main() {
 	transferLimiter := ratelimit.NewRedisLimiter(redisClient, "transfer_limit:")
 	transferRateLimitMW := middleware.RateLimit(transferLimiter, 10, time.Minute)
 	r := ginpkg.Default()
+	globalLimiter := ratelimit.NewRedisLimiter(redisClient, "rl")
+	r.Use(middleware.RateLimit(globalLimiter, 100, time.Minute))
 
 	r.GET("/health", func(c *ginpkg.Context) {
 		if err := pool.Ping(c.Request.Context()); err != nil {
