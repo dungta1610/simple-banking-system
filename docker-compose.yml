@@ -28,6 +28,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   pgdata:
