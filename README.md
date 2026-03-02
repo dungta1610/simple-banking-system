@@ -42,6 +42,8 @@ A minimal banking backend focused on **data consistency** and **concurrency safe
 
 ## Database Schema
 
+![Database Schema](images/database-schema.jpeg)
+
 ### Tables
 **accounts**
 - `id` (bigserial, PK)
